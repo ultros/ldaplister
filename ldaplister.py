@@ -33,6 +33,9 @@ def main():
 
     args = parser.parse_args()
 
+    ldap_query = ldapl.LdapQuery(args.target, args.username, args.password, args.basedn)
+    ldap_query.authenticated_logon()
+
     if args.anony is True:
         ldap_query = ldapl.LdapQuery(args.target, "", "", "")
         domain_details = ldap_query.get_domain_information()
@@ -40,20 +43,14 @@ def main():
         exit(0)
 
     if args.pass_search is True:
-        ldap_query = ldapl.LdapQuery(args.target, args.username, args.password, args.basedn)
-        ldap_query.authenticated_logon()
         ldap_query.query_for_passwords()
         exit(0)
 
     if args.get_users is True:
-        ldap_query = ldapl.LdapQuery(args.target, args.username, args.password, args.basedn)
-        ldap_query.authenticated_logon()
         ldap_query.query_all_users()
         exit(0)
 
     if args.get_computers is True:
-        ldap_query = ldapl.LdapQuery(args.target, args.username, args.password, args.basedn)
-        ldap_query.authenticated_logon()
         ldap_query.query_all_computers()
         exit(0)
 

@@ -44,7 +44,6 @@ class LdapQuery:
     def query_for_passwords(self):
         """Checks the "description" field for User accounts with "password" in the description.
         """
-
         entry_list = self.connection.extend.standard.paged_search(search_base=self.basedn,
                                                                   search_filter="(&(objectClass=user)"
                                                                                 "(description=*pass*))",
@@ -64,3 +63,4 @@ class LdapQuery:
 
         for entry in self.connection.entries:
             print(entry)
+            
