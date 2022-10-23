@@ -27,6 +27,9 @@ def main():
     parser.add_argument("--get-all-users", required=False,
                         default=False, action='store_true', dest='get_users',
                         help="Dump all AD users.")
+    parser.add_argument("--get-all-computers", required=False,
+                        default=False, action='store_true', dest='get_computers',
+                        help="Dump all AD computers.")
 
     args = parser.parse_args()
 
@@ -46,6 +49,12 @@ def main():
         ldap_query = ldapl.LdapQuery(args.target, args.username, args.password, args.basedn)
         ldap_query.authenticated_logon()
         ldap_query.query_all_users()
+        exit(0)
+
+    if args.get_computers is True:
+        ldap_query = ldapl.LdapQuery(args.target, args.username, args.password, args.basedn)
+        ldap_query.authenticated_logon()
+        ldap_query.query_all_computers()
         exit(0)
 
 

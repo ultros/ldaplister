@@ -55,3 +55,13 @@ class LdapQuery:
 
         for entry in self.connection.entries:
             print(entry)
+
+    def query_all_computers(self):
+        entry_list = self.connection.extend.standard.paged_search(search_base=self.basedn,
+                                                                  search_filter="(&(objectClass=computer))",
+                                                                  search_scope=ldap3.SUBTREE,
+                                                                  attributes=[ldap3.ALL_ATTRIBUTES],
+                                                                  paged_size=5, generator=False)
+
+        for entry in self.connection.entries:
+            print(entry)
