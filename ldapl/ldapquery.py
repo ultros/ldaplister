@@ -1,5 +1,4 @@
 import ldap3
-import ldif
 import sys
 import json
 
