@@ -6,7 +6,7 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="LDAP Tools")
-    parser.add_argument('-t' '--target-ip', required=False, type=str,
+    parser.add_argument('-t', '--target-ip', required=False, type=str,
                         default=None, dest="target",
                         help="Specify the target IP address.")
     parser.add_argument('-a', '--anonymous', required=False,
