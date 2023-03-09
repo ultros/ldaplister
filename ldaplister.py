@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import ldapl.ldapquery as ldapl
+import Core.ldapquery
 import argparse
 
 
 def main():
     parser = argparse.ArgumentParser(description="LDAP Tools")
-    parser.add_argument('-t', '--target-ip', required=False, type=str,
+    parser.add_argument('-t', '--target-ip', required=True, type=str,
                         default=None, dest="target",
                         help="Specify the target IP address.")
     parser.add_argument('-a', '--anonymous', required=False,
@@ -30,16 +30,22 @@ def main():
     parser.add_argument("--get-all-computers", required=False,
                         default=False, action='store_true', dest='get_computers',
                         help="Dump all AD computers.")
+    parser.add_argument("--get-disabled-accounts", required=False,
+                        default=False, action='store_true', dest="disabled_accounts",
+                        help="Dump all disabled accounts.")
 
     args = parser.parse_args()
 
-    ldap_query = ldapl.LdapQuery(args.target, args.username, args.password, args.basedn)
+    ldap_query = Core.ldapquery.LdapQuery(args.target, args.username, args.password, args.basedn)
     ldap_query.authenticated_logon()
 
+
+
+
     if args.anony is True:
-        ldap_query = ldapl.LdapQuery(args.target, "", "", "")
+        ldap_query = Core.ldapquery.LdapQuery(args.target, "", "", "")
         domain_details = ldap_query.get_domain_information()
-        print(*domain_details, sep='\n')
+        print(domain_details[0], domain_details[1], sep='\r\n')
         exit(0)
 
     if args.pass_search is True:
@@ -54,6 +60,9 @@ def main():
         ldap_query.query_all_computers()
         exit(0)
 
+    if args.disabled_accounts is True:
+        ldap_query.query_disabled_accounts()
+        exit(0)
 
 if __name__ == "__main__":
     main()

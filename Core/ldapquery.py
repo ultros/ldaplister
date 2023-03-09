@@ -13,7 +13,7 @@ class LdapQuery:
         self.connection = ""
         self.server = ""
 
-    def get_domain_information(self):
+    def get_domain_information(self) -> tuple:
         """Gather server information using an anonymous logon against a target.
         Returns the defaultNamingContext and the dnsHostName for the target.
         """
@@ -31,7 +31,7 @@ class LdapQuery:
         self.connection = ldap3.Connection(server, user=self.username, password=self.password)
         self.connection.bind()
 
-    def query_all_users(self):
+    def query_all_users(self) -> None:
         self.connection.extend.standard.paged_search(search_base=self.basedn,
                                                      search_filter="(objectClass=user)",
                                                      search_scope=ldap3.SUBTREE,
@@ -41,10 +41,10 @@ class LdapQuery:
         for entry in self.connection.entries:
             print(entry)
 
-    def query_for_passwords(self):
+    def query_for_passwords(self) -> None:
         """Checks the "description" field for User accounts with "password" in the description.
         """
-        entry_list = self.connection.extend.standard.paged_search(search_base=self.basedn,
+        self.connection.extend.standard.paged_search(search_base=self.basedn,
                                                                   search_filter="(&(objectClass=user)"
                                                                                 "(description=*pass*))",
                                                                   search_scope=ldap3.SUBTREE,
@@ -54,8 +54,8 @@ class LdapQuery:
         for entry in self.connection.entries:
             print(entry)
 
-    def query_all_computers(self):
-        entry_list = self.connection.extend.standard.paged_search(search_base=self.basedn,
+    def query_all_computers(self) -> None:
+        self.connection.extend.standard.paged_search(search_base=self.basedn,
                                                                   search_filter="(&(objectClass=computer))",
                                                                   search_scope=ldap3.SUBTREE,
                                                                   attributes=[ldap3.ALL_ATTRIBUTES],
@@ -63,4 +63,13 @@ class LdapQuery:
 
         for entry in self.connection.entries:
             print(entry)
-            
+
+    def query_disabled_accounts(self):
+        self.connection.extend.standard.paged_search(search_base=self.basedn,
+                                                     search_filter="(&(objectCategory=person)(objectClass=user)"
+                                                                   "(userAccountControl:1.2.840.113556.1.4.803:=2))",
+                                                     search_scope=ldap3.SUBTREE,
+                                                     attributes=[ldap3.ALL_ATTRIBUTES],
+                                                     generator=False)
+        for entry in self.connection.entries:
+            print(entry)
