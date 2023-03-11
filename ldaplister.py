@@ -4,7 +4,7 @@ import Core.ldapquery
 import argparse
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="LDAP Tools")
     parser.add_argument('-t', '--target-ip', required=True, type=str,
                         default=None, dest="target",
@@ -18,7 +18,7 @@ def main():
     parser.add_argument("-p", '--password', required=False, type=str,
                         default=None, dest="password",
                         help='Specify account password.')
-    parser.add_argument("--basedn", required=False, type=str,
+    parser.add_argument("--base-dn", required=False, type=str,
                         default=None, dest="basedn",
                         help='Specify the base distinguished name. Get this using "-a" for an anonymous bind.')
     parser.add_argument("--password-search", required=False,
@@ -33,19 +33,20 @@ def main():
     parser.add_argument("--get-disabled-accounts", required=False,
                         default=False, action='store_true', dest="disabled_accounts",
                         help="Dump all disabled accounts.")
+    parser.add_argument("--unconstrained-delegation", required=False,
+                        default=False, action='store_true', dest="unconstrained_delegation",
+                        help="Accounts with Unconstrained Delegation")
 
     args = parser.parse_args()
 
     ldap_query = Core.ldapquery.LdapQuery(args.target, args.username, args.password, args.basedn)
     ldap_query.authenticated_logon()
-
-
-
+    # ldap_query.query_reversible_password()
 
     if args.anony is True:
         ldap_query = Core.ldapquery.LdapQuery(args.target, "", "", "")
         domain_details = ldap_query.get_domain_information()
-        print(domain_details[0], domain_details[1], sep='\r\n')
+        print(domain_details[0], domain_details[1], domain_details[2], domain_details[3], domain_details[4], sep='\r\n')
         exit(0)
 
     if args.pass_search is True:
@@ -62,6 +63,10 @@ def main():
 
     if args.disabled_accounts is True:
         ldap_query.query_disabled_accounts()
+        exit(0)
+
+    if args.unconstrained_delegation is True:
+        ldap_query.query_unconstrained_delegation()
         exit(0)
 
 if __name__ == "__main__":

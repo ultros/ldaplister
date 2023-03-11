@@ -24,19 +24,32 @@ class LdapQuery:
         data_dict = json.loads(json_server_data)
 
         return f"DNS Hostname: {data_dict['raw']['dnsHostName'][0]}", \
-               f"Base DN: {data_dict['raw']['defaultNamingContext'][0]}"
+            f"Base DN: {data_dict['raw']['defaultNamingContext'][0]}", \
+            f"Domain Controller Functionality Level: {data_dict['raw']['domainControllerFunctionality'][0]}", \
+            f"Controller Functionality Level: {data_dict['raw']['domainFunctionality'][0]}", \
+            f"Forest Functionality Level: {data_dict['raw']['forestFunctionality'][0]}"
 
     def authenticated_logon(self) -> None:
         server = ldap3.Server(self.target, get_info=ldap3.ALL)
         self.connection = ldap3.Connection(server, user=self.username, password=self.password)
         self.connection.bind()
 
-    def query_all_users(self) -> None:
+
+    def query_schema(self) -> None:
         self.connection.extend.standard.paged_search(search_base=self.basedn,
-                                                     search_filter="(objectClass=user)",
+                                                     search_filter="(cn=schema)",
                                                      search_scope=ldap3.SUBTREE,
                                                      attributes=ldap3.ALL_ATTRIBUTES,
-                                                     paged_size=5, generator=False)
+                                                     generator=False)
+        for entry in self.connection.entries:
+            print(entry)
+
+    def query_all_users(self) -> None:
+        self.connection.extend.standard.paged_search(search_base=self.basedn,
+                                                     search_filter="(objectCategory=user)",
+                                                     search_scope=ldap3.SUBTREE,
+                                                     attributes=ldap3.ALL_ATTRIBUTES,
+                                                     generator=False)
 
         for entry in self.connection.entries:
             print(entry)
@@ -49,7 +62,7 @@ class LdapQuery:
                                                                                 "(description=*pass*))",
                                                                   search_scope=ldap3.SUBTREE,
                                                                   attributes=['cn', 'description'],
-                                                                  paged_size=5, generator=False)
+                                                                  generator=False)
 
         for entry in self.connection.entries:
             print(entry)
@@ -59,15 +72,47 @@ class LdapQuery:
                                                                   search_filter="(&(objectClass=computer))",
                                                                   search_scope=ldap3.SUBTREE,
                                                                   attributes=[ldap3.ALL_ATTRIBUTES],
-                                                                  paged_size=5, generator=False)
+                                                                  generator=False)
 
         for entry in self.connection.entries:
             print(entry)
 
-    def query_disabled_accounts(self):
+    def query_disabled_accounts(self) -> None:
         self.connection.extend.standard.paged_search(search_base=self.basedn,
                                                      search_filter="(&(objectCategory=person)(objectClass=user)"
                                                                    "(userAccountControl:1.2.840.113556.1.4.803:=2))",
+                                                     search_scope=ldap3.SUBTREE,
+                                                     attributes=[ldap3.ALL_ATTRIBUTES],
+                                                     generator=False)
+        for entry in self.connection.entries:
+            print(entry)
+
+    def query_unconstrained_delegation(self) -> None:
+        self.connection.extend.standard.paged_search(search_base=self.basedn,
+                                                     search_filter="(&(objectCategory=user)"
+                                                                   "(userAccountControl:1.2.840.113556.1.4.803:="
+                                                                   "524288))",
+                                                     search_scope=ldap3.SUBTREE,
+                                                     attributes=[ldap3.ALL_ATTRIBUTES],
+                                                     generator=False)
+        for entry in self.connection.entries:
+            print(entry)
+
+    def query_smart_card(self) -> None:
+        self.connection.extend.standard.paged_search(search_base=self.basedn,
+                                                     search_filter="(&(objectCategory=person)(objectClass=user)"
+                                                                   "(userAccountControl:1.2.840.113556.1.4.803:="
+                                                                   "262144))",
+                                                     search_scope=ldap3.SUBTREE,
+                                                     attributes=[ldap3.ALL_ATTRIBUTES],
+                                                     generator=False)
+        for entry in self.connection.entries:
+            print(entry)
+
+    def query_reversible_password(self) -> None:
+        self.connection.extend.standard.paged_search(search_base=self.basedn,
+                                                     search_filter="(&(objectCategory=person)(objectClass=user)"
+                                                                   "(userAccountControl:1.2.840.113556.1.4.803:=128))",
                                                      search_scope=ldap3.SUBTREE,
                                                      attributes=[ldap3.ALL_ATTRIBUTES],
                                                      generator=False)
